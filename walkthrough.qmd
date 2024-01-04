@@ -97,7 +97,7 @@ Questionnaire outlining the ten crucial points that need careful scrutiny when e
 # Organization
 In this walk-through, @sec-interludes introduce various background topics that are relevant to the present study. These topics enable readers to progress smoothly through this research. Specifically, @sec-interlude1 provides a brief explanation of how Bayesian inference procedures work and their importance for this research. @sec-interlude2 is devoted to explaining the difference between two particular distributions, the normal and the beta-proportion distribution, and their role on modeling bounded data. @sec-interlude3 explain the (generalized) linear mixed models, elaborating on their role in modeling (non)normal clustered and bounded data. @sec-interlude4 illustrate the concept of measurement error and the role of latent variables to overcome the problems arising from it. Lastly, @sec-interlude5 explains the effects of the data distributional departures on the parameter estimates, and its importance for this research.
 
-The specific analysis for this study are elaborated from section @sec-introduction onwards. Particularly, @sec-introduction elaborates on the general context, gaps and main purpose of the study. @sec-RQs introduces the research questions that guide this study. @sec-data explores the data and its implications. @sec-methods thoroughly develop the methods to analyze the data. Lastly, @sec-results provides answers to the research question at hand.
+The specific analysis for this study are elaborated from section @sec-introduction onwards. Particularly, @sec-introduction elaborates on the general context, gaps and main purpose of the study. @sec-RQs introduces the research questions that guide this study. @sec-data explores the data and its implications. @sec-methods thoroughly develop the methods to analyze the data. @sec-results provides answers to the research question at hand. @sec-discussion discuss the findings, limitations and future research derived from this study. Lastly, @sec-conclusions provides the concluding thoughts for the study. 
 
 The R packages utilized in the production of this document can be divided in three groups. First, the packages utilized to generate this document: `RColorBrewer` [@RColorBrewer_2022] and `quarto` [@Quarto_2022]. Second, the packages used for the handling the data: `stringr` [@stringr_2022], `dplyr` [@dplyr_2023], `tidyverse` [@tidyverse_2019], and `reshape2` [@reshape_2007]. Lastly, the packages used for the Bayesian implementation: `coda` [@coda_2006], `loo` [@loo_2023; @PSIS_2021], `cmdstanr` [@cmdstanr_2022], `rstan` [@RStan_2020], `runjags` [@runjags_2016], and `rethinking` [@rethinking_2021].
 
@@ -5370,7 +5370,7 @@ dens_plot(stanfit_obj=model12, pars=par_int, p=0.95) # <2>
 2. used-defined function: generation of density plot with HPDI for selected parameters
 
 
-# Discussion
+# Discussion {#sec-discussion}
 
 ## Findings
 
@@ -5402,7 +5402,7 @@ Conversely, a second avenue for exploration involves integrating diverse data ty
 <!-- Relatedly, the use of these models lead to a careful design and planning of the experiments designed to measure intelligibility. -->
 
 
-# Conclusions
+# Conclusions {#sec-conclusions}
 
 This study highlights the effectiveness of the Bayesian Beta-proportion GLLAMM to collectively address several key data features when investigating unobservable and complex traits, using speech intelligibility and entropy scores as an example. The results demonstrate the proposed model consistently outperforms the Normal LMM in predicting the empirical phenomena. Moreover, it exhibits the ability to quantify the latent potential intelligibility of speakers, allowing for the ranking and comparison of individuals based on the latent trait while accommodating associated uncertainties. Additionally, the proposed model facilitates the exploration of research theories concerning the influence of speaker-related factors on potential intelligibility. The study indicates that integrating and comparing these theories within the model's framework is a straightforward task. However, the introduction of these innovative statistical tools presents new challenges for researchers seeking implementation. These challenges encompass the principled formulation of assumptions about the data-generating processes and research inquiries, along with the need for familiarity with probabilistic programming languages (PPLs) essential for implementing Bayesian methods. Nevertheless, the study suggests several promising avenues for future research, including power analysis, causal hypothesis formulation, and exploration and integration of novel evaluation methods for assessing intelligibility. The insights derived from this study hold implications for both researchers and data analysts interested in quantitatively measuring and testing theories related to nuanced, unobservable constructs, while also considering the appropriate prediction of the empirical phenomena. 
 
