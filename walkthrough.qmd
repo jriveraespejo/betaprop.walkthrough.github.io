@@ -1,41 +1,57 @@
 ---
 title: 'Walk-through'
 subtitle: 'Everything, altogether, all at once: Addressing data challenges when measuring speech intelligibility through entropy scores'
-author: 
-  - name: Rivera Espejo, Jose (corresponding)
-    email: JoseManuel.RiveraEspejo@uantwerpen.be
+author:
+  - name: 
+      given: Jose Manuel
+      family: Rivera Espejo
+    orcid: 0000-0002-3088-2783
     url: https://www.uantwerpen.be/en/staff/jose-manuel-rivera-espejo_23166/
-    attributes:
-      corresponding: true
-    affiliations:
+    email: JoseManuel.RiveraEspejo@uantwerpen.be
+    corresponding: true
+    roles: [conceptualization, methodology, data curation, analysis, writing, software, investigation, validation, visualization]
+    affiliation:
       - name: University of Antwerp
-        department: Training and Education Sciences
-        city: Antwerp
-        country: Belgium
-        postal-code: 2000
-  - name: De Maeyer, Sven 
-    email: sven.demaeyer@uantwerpen.be
+        department: Education sciences
+        group: Edubron
+  - name: 
+      given: Sven
+      family: De Maeyer
+      #non-dropping-particle: De
+    orcid: 0000-0003-2888-1631
     url: https://www.uantwerpen.be/en/staff/sven-demaeyer/
-    attributes:
-      corresponding: false
-    affiliations:
+    email: sven.demaeyer@uantwerpen.be
+    corresponding: false
+    roles: [conceptualization, methodology, editing, supervision, project administration, funding, investigation, resources]
+    affiliation:
       - name: University of Antwerp
-        department: Training and Education Sciences
-        city: Antwerp
-        country: Belgium
-        postal-code: 2000
-  - name: Gillis, Steven 
+        department: Education sciences
+        group: Edubron
+  - name: 
+      given: Steven
+      family: Gillis
+    orcid: 
+    url: https://www.uantwerpen.be/nl/personeel/steven-gillis/
     email: steven.gillis@uantwerpen.be
-    url: https://www.clips.uantwerpen.be/~gillis/index.html
-    attributes:
-      corresponding: false
-    affiliations:
+    corresponding: false
+    roles: [conceptualization, methodology, editing, supervision, project administration, funding, investigation, resources]
+    affiliation:
       - name: University of Antwerp
-        department: Computational Linguistics, and Psycholinguistics Research Centre
-        city: Antwerp
-        country: Belgium
-        postal-code: 2000
-date: today
+        department: Linguistics
+        group: Centre for computational linguistics, psycholinguistics, and sociolinguistics (CLiPS)
+funding: 
+  statement: "The project was founded through the Research Fund of the University of Antwerp (BOF)."
+keywords:
+  - Bayesian analysis 
+  - speech intelligibility 
+  - bounded outcomes 
+  - clustering 
+  - measurement error
+  - outliers
+  - heteroscedasticity
+  - generalized linear latent and mixed models
+  - robust regression models.
+date: last-modified
 bibliography: bibliography.bib
 # geometry:
 #   - left=1.0in
@@ -49,12 +65,15 @@ execute:
   error: false
 format:
   html:
+    licence: 'CC BY-SA'
+    comments:
+      hypothesis: true
     cite-method: citeproc
     csl: apa-6th-edition.csl
     keep-tex: true
     embed-resources: true
     link-external-icon: true
-    link-external-newwindow: true
+    link-external-newwindow: false
     page-layout: article
     theme: 
       light: materia
@@ -64,11 +83,11 @@ format:
     toc: true
     toc-depth: 3
     toc-expand: 1
-    toc-title: 'Contents'
+    toc-title: 'Table of contents'
     toc-location: left
     number-sections: true
     # number-depth: 3
-    anchor-sections: true
+    anchor-sections: false
     html-math-method: katex
     citations-hover: true
     footnotes-hover: true
@@ -85,21 +104,43 @@ format:
 ---
 
 # Aim
-The purpose of this walk-through is to improve the transparency and replicability of the analysis for the study **Everything, altogether, all at once: Addressing data challenges when measuring speech intelligibility through entropy scores** (in press.). This digital document contains all the code and materials utilized in the study. Furthermore, the walk-through meticulously follows the *When-to-Worry-and-How-to-Avoid-the-Misuse-of-Bayesian-Statistics checklist (WAMBS checklist)* developed by Depaoli & van de Schoot [-@Depaoli_et_al_2017]. This checklist outlines the ten crucial points that need careful scrutiny when employing Bayesian inference procedures. 
+The purpose of this walk-through is to improve the transparency and replicability of the analysis for the study **Everything, altogether, all at once: Addressing data challenges when measuring speech intelligibility through entropy scores** (in press.). This digital document contains all the code and materials utilized in the study. Furthermore, the walk-through meticulously follows the *When-to-Worry-and-How-to-Avoid-the-Misuse-of-Bayesian-Statistics checklist (WAMBS checklist)* developed by Depaoli & van de Schoot [-@Depaoli_et_al_2017]. The checklist outlines the ten crucial points that need careful scrutiny when employing Bayesian inference procedures. 
 
 ::: {.column-margin}
 **_WAMBS checklist_** 
 
-Questionnaire outlining the ten crucial points that need careful scrutiny when employing Bayesian inference procedures, with the ultimate goal of enhancing the transparency and replicability of the analysis [@Depaoli_et_al_2017].
+Questionnaire outlining the ten crucial points that need careful scrutiny when employing Bayesian inference procedures, with the ultimate goal of enhancing the transparency and replicability of Bayesian analysis [@Depaoli_et_al_2017].
 :::
+
+```{r}
+#| results: hide
+#| label: code-package
+#| fig-cap: ''
+
+# load packages
+libraries = c('stringr','RColorBrewer','dplyr','knitr',
+              'rethinking','rstan','StanHeaders','runjags')
+sapply(libraries, require, character.only=T)
+
+```
+
+```{r}
+#| label: code-usd
+#| fig-cap: ''
+
+# load functions
+main_dir = '/home/josema/Desktop/1. Work/1 research/PhD Antwerp/#thesis/paper1'
+source( file.path( main_dir, 'walkthrough/code', 'user-defined-functions.R') )
+
+```
 
 
 # Organization
-In this walk-through, @sec-interludes introduce various background topics that are relevant to the present study. These topics enable readers to progress smoothly through this research. Specifically, @sec-interlude1 provides a brief explanation of how Bayesian inference procedures work and their importance for this research. @sec-interlude2 is devoted to explaining the difference between two particular distributions, the normal and the beta-proportion distribution, and their role on modeling bounded data. @sec-interlude3 explain the (generalized) linear mixed models, elaborating on their role in modeling (non)normal clustered and bounded data. @sec-interlude4 illustrate the concept of measurement error and the role of latent variables to overcome the problems arising from it. Lastly, @sec-interlude5 explains the effects of the data distributional departures on the parameter estimates, and its importance for this research.
+In this walk-through, @sec-interludes introduces various background topics that are relevant to the present study. These topics enable readers to progress smoothly through this research. Specifically, @sec-interlude1 provides a brief explanation of how Bayesian inference procedures work and their importance for this research. @sec-interlude2 is devoted to explaining the difference between two particular distributions, the normal and the beta-proportion distribution, and their role on modeling bounded data. @sec-interlude3 explains the (generalized) linear mixed models, elaborating on their role in modeling (non)normal clustered and bounded data. @sec-interlude4 illustrates the concept of measurement error and the role of latent variables to overcome the problems arising from it. Lastly, @sec-interlude5 explains the effects of the data distributional departures on the parameter estimates, and its importance for this research.
 
-The specific analysis for this study are elaborated from section @sec-introduction onwards. Particularly, @sec-introduction elaborates on the general context, gaps and main purpose of the study. @sec-RQs introduces the research questions that guide this study. @sec-data explores the data and its implications. @sec-methods thoroughly develop the methods to analyze the data. @sec-results provides answers to the research question at hand. @sec-discussion discuss the findings, limitations and future research derived from this study. Lastly, @sec-conclusions provides the concluding thoughts for the study. 
+The specific analyses for this study are elaborated from section @sec-introduction onwards. Particularly, @sec-introduction elaborates on the general context, gaps and main purpose of the study. @sec-RQs introduces the research questions that guide this study. @sec-data explores the data and its implications. @sec-methods thoroughly develops the methods to analyze the data. @sec-results provides answers to the research question at hand. @sec-discussion discusses the findings, limitations and future research derived from this study. Lastly, @sec-conclusions provides the concluding thoughts for the study. 
 
-The R packages utilized in the production of this document can be divided in three groups. First, the packages utilized to generate this document: `RColorBrewer` [@RColorBrewer_2022] and `quarto` [@Quarto_2022]. Second, the packages used for the handling the data: `stringr` [@stringr_2022], `dplyr` [@dplyr_2023], `tidyverse` [@tidyverse_2019], and `reshape2` [@reshape_2007]. Lastly, the packages used for the Bayesian implementation: `coda` [@coda_2006], `loo` [@loo_2023; @PSIS_2021], `cmdstanr` [@cmdstanr_2022], `rstan` [@RStan_2020], `runjags` [@runjags_2016], and `rethinking` [@rethinking_2021].
+The R packages utilized in the production of this document can be divided in three groups. First, the packages utilized to generate the walk-through: `RColorBrewer` [@RColorBrewer_2022] and `quarto` [@Quarto_2022]. Second, the packages used for the handling the data: `stringr` [@stringr_2022], `dplyr` [@dplyr_2023], `tidyverse` [@tidyverse_2019], and `reshape2` [@reshape_2007]. Lastly, the packages used for the Bayesian estimation: `coda` [@coda_2006], `loo` [@loo_2023; @PSIS_2021], `cmdstanr` [@cmdstanr_2022], `rstan` [@RStan_2020], `runjags` [@runjags_2016], and `rethinking` [@rethinking_2021].
 
 
 # Interludes {#sec-interludes}
@@ -108,7 +149,7 @@ The R packages utilized in the production of this document can be divided in thr
 
 ### Theory {#sec-bayesian_theory}
 
-Bayesian inference is an approach to statistical modeling and inference that is primarily based on the *Bayes' theorem*. The procedure aims to derive appropriate inference statements about a set of parameters by revising and updating their occurrence probabilities in light of new evidence [@Everitt_et_al_2010]. The procedure consist on defining the model assumptions in the form of a *likelihood* for the outcome and a set of *prior distributions* for the parameters of interest. Upon observing empirical data, these priors undergo updating to *posterior distributions* following Bayes' rule [@Jeffreys_1998], from which the statistical inferences are derived [^1]. As an example, a simple linear regression model with a parameter $\beta$ can be encoded under the Bayesian inference paradigm in the following form:
+Bayesian inference is an approach to statistical modeling and inference that is primarily based on the *Bayes' theorem*. The procedure aims to derive appropriate inference statements about a set of parameters by revising and updating their occurrence probabilities in light of new evidence [@Everitt_et_al_2010]. The procedure consists of defining the model assumptions in the form of a *likelihood* for the outcome and a set of *prior distributions* for the parameters of interest. Upon observing empirical data, these priors undergo updating to *posterior distributions* following Bayes' rule [@Jeffreys_1998], from which the statistical inferences are derived [^1]. As an example, a simple linear regression model with a parameter $\beta$ can be encoded under the Bayesian inference paradigm in the following form:
 
 [^1]: For a thorough explanation of the Bayesian inferences procedures the reader can refer to Kruschke [-@Kruschke_2015] or McElreath [-@McElreath_2020].
 
@@ -124,15 +165,13 @@ P(\beta | Y, X ) &= \frac{ P( Y | \beta, X ) \cdot P( \beta ) }{ P( Y ) }
 \end{align*}
 $$ {#eq-bayes1}
 
-where $P( Y| \beta, X )$ defines the *likelihood* of the outcome, which represents the assumed probability distribution for the outcome $Y$, given the parameter $\beta$ and covariate $X$, i.e., is the distribution that describes the assumption about the underlying process that give rise to the data [@Everitt_et_al_2010].
+where $P( Y| \beta, X )$ defines the *likelihood* of the outcome, which represents the assumed probability distribution for the outcome $Y$, given the parameter $\beta$ and covariate $X$. This is the distribution that describes the assumption about the underlying processes that give rise to the data [@Everitt_et_al_2010]. $P( \beta )$ defines the *prior distribution* of the parameter $\beta$. A *prior* is a probability distribution summarizing the information about a parameter known or assumed before observing any empirical data  [@Everitt_et_al_2010]. Lastly, $P( Y )$ defines the probability distribution of the data, which represents the *evidence* of the observed empirical data. Consequently, the *posterior distribution* of the parameter $P( \beta | Y, X )$ describes the probability distribution of $\beta$ after observing empirical data.
 
 ::: {.column-margin}
 **_Likelihood_** 
 
-probability distribution that describes the assumption about the underlying process that give rise to the data [@Everitt_et_al_2010].
+probability distribution that describes the assumption about the underlying processes that give rise to the data [@Everitt_et_al_2010].
 :::
-
-$P( \beta )$ defines the *prior distribution* of the parameter $\beta$. A *prior* is a probability distribution summarizing the information about a parameter known or assumed before observing any empirical data  [@Everitt_et_al_2010].
 
 ::: {.column-margin}
 **_Prior distribution_** 
@@ -140,18 +179,13 @@ $P( \beta )$ defines the *prior distribution* of the parameter $\beta$. A *prior
 Probability distribution summarizing the information about a parameter known or assumed before observing any empirical data [@Everitt_et_al_2010].
 :::
 
-$P( Y )$ defines the probability distribution of the data, which represents the *evidence* of the observed empirical data.
-
-As a result $P( \beta | Y, X )$, which denotes the *posterior distribution* of the parameter, describes the probability distribution of $\beta$ after observing empirical data.
-
-
 ::: {.column-margin}
 **_Posterior distribution_** 
 
 Probability distribution summarizing the information about a parameter after observing empirical data [@Everitt_et_al_2010].
 :::
 
-Before implementing the Bayesian inference procedures, two important concepts related to @eq-bayes1 need to be understood. First, the evidence of the empirical data $P(Y)$ serves as a normalizing constant. This is just another way of saying that the numerator in the equation is rescaled by a constant obtained from calculating $P(Y)$. Consequently, without loosing generalization, the equation can be succinctly rewritten in the following form:
+Before implementing Bayesian inference procedures, two important concepts related to @eq-bayes1 need to be understood. First, the evidence of the empirical data $P(Y)$ serves as a normalizing constant. This just says that the numerator in the equation is re-scaled by a constant obtained from calculating $P(Y)$. Consequently, without loosing generalization, the equation can be succinctly rewritten in the following form:
 
 $$ 
 \begin{align*}
@@ -159,9 +193,9 @@ P(\beta | Y, X ) &\propto P( Y | \beta, X ) \cdot P( \beta ) \\
 \end{align*}
 $$ {#eq-bayes2}
 
-where $\propto$ denotes the proportional symbol. This implies that the posterior distribution of $\beta$ is proportional (up to a constant) to the multiplication of the outcome's likelihood and the parameter's prior distribution. This definition make the *calculation* of the posterior distribution easier, by separating the parameter's *updating process* from the integration of new empirical data (this will be clearly seen in the code provided in @sec-howitworks).
+where $\propto$ denotes the proportional symbol. This implies that the posterior distribution of $\beta$ is proportional (up to a constant) to the multiplication of the outcome's likelihood and the parameter's prior distribution. This definition makes the *calculation* of posterior distributions easier, by separating the parameter's *updating process* from the integration of new empirical data (this will be clearly seen in the code provided in @sec-howitworks).
 
-Second, a dataset usually have multiple observations of the outcome $Y$ and covariate $X$, in the form of $y_{i}$ and $x_{i}$. Therefore, by law of probabilities and assuming independence among the observations, the likelihood of the full dataset can be rewritten as the product of all individual observation likelihoods. Consequently, @eq-bayes2 can also be rewritten as follows:
+Second, a dataset usually has multiple observations of the outcome $Y$ and covariates $X$, in the form of $y_{i}$ and $x_{i}$. Therefore, by law of probabilities, and assuming independence among the observations, the likelihood of a dataset can be rewritten as the product of all individual likelihoods. Consequently, @eq-bayes2 can also be rewritten as follows:
 
 $$ 
 \begin{align*}
@@ -172,19 +206,16 @@ $$ {#eq-bayes3}
 
 ### Estimation methods {#sec-estimation_methods}
 
-Several methods within the Bayesian inference procedures can be utilized to *estimate* the posterior distribution of the parameter, and most of these fall into the category of *Markov Chain Monte Carlo methods (MCMC)*. *MCMC* are methods to indirectly simulate random observations from probability distributions using stochastic processes [@Everitt_et_al_2010] [^2]. 
+Several methods within the Bayesian inference procedures can be utilized to *estimate* the posterior distribution of the parameter, and most of these fall into the category of *Markov Chain Monte Carlo methods (MCMC)*. *MCMC* are methods to indirectly simulate random observations from probability distributions using stochastic processes [@Everitt_et_al_2010] [^2]. However, when the parameters of interest are not large in number, a useful *pedagogical* method to produce the posterior distribution is the *grid approximation* method. Through this method, an excellent approximation of the parameter's posterior distribution can be achieved by considering a finite candidate list of parameter values. This method is used in @sec-howitworks to illustrate how the Bayesian inference works [^3]. 
 
 [^2]: The reader can refer to Brooks et al. [-@Gelman_et_al_2011] for a detailed treatment on MCMC methods.
+[^3]: An interested reader can further refer to McElreath [-@McElreath_2020] for a detailed explanation of grid approximation. 
 
 ::: {.column-margin}
 **_Markov Chain Monte Carlo (MCMC)_** 
 
 Methods to indirectly simulate random observations from probability distributions using stochastic processes [@Everitt_et_al_2010].
 :::
-
-However, when the parameters of interest are not large in number, a useful pedagogical method to produce the posterior distribution is the *grid approximation* method. Through this method, an excellent approximation of the parameter's posterior distribution can be achieved by considering a finite candidate list of parameter values. This method is used in @sec-howitworks to illustrate how the Bayesian inference works [^3]. 
-
-[^3]: An interested reader can further refer to McElreath [-@McElreath_2020] for a detailed explanation of grid approximation. 
 
 ::: {.column-margin}
 **_Grid approximation_** 
@@ -203,7 +234,7 @@ e_{i} &\sim \text{Normal}( 0, 1 ) \\
 \beta &\sim \text{Uniform}( -20, +20 )
 \end{align*}
 $$
-where $y_{i}$ denotes the outcome's observation $i$, $\beta$ the expected effect of the observed covariate $x_{i}$ on the outcome, and $e_{i}$ the outcome's residual in observation $i$. Furthermore, the model assumes the residual $e_{i}$ is also normally distributed with mean zero and standard deviation equal to one. Lastly, prior to observe any data, it is assumed that $\beta$ is uniformly distributed within the range of $[-20,+20]$.
+where $y_{i}$ denotes the outcome's observation $i$, $\beta$ the expected effect of the observed covariate $x_{i}$ on the outcome, and $e_{i}$ the outcome's residual in observation $i$. Furthermore, the residuals $e_{i}$ are assumed to follow a normal distribution with mean zero and standard deviation equal to one. Lastly, prior to observe any data, it is assumed that $\beta$ is uniformly distributed within the range of $[-20,+20]$. This prior implies that equal probabilities are assigned to all values of $\beta$ within this range. 
 
 However, a more convenient generalized manner to represent the same linear regression model is as follows:
 
@@ -214,7 +245,7 @@ y_{i} &\sim \text{Normal}( \mu_{i}, 1 ) \\
 \beta &\sim \text{Uniform}( -20, +20 )
 \end{align*}
 $$
-In this definition, the component of the Bayesian inference procedure detailed in @sec-bayesian_theory are more easily spotted. First, about the likelihood, the outcome is assumed to be normally distributed with mean $\mu_{i}$ and standard deviation equal to one. Second, it is assumed $\beta$ has a prior that is assumed uniformly distributed within the range of $[-20,+20]$. Additionally, the equations reveal that the mean of the outcome $\mu_{i}$ is modeled by a linear predictor composed by the covariate $x_{i}$ and its effect on the outcome $\beta$.
+In this definition, the component of the Bayesian inference procedure detailed in @sec-bayesian_theory are more easily spotted. First, about the likelihood, the outcome is assumed to be normally distributed with mean $\mu_{i}$ and standard deviation equal to one. Second, it is assumed that $\beta$ has a uniform prior within the range of $[-20,+20]$. Moreover, the equations reveal that the mean of the outcome $\mu_{i}$ is modeled by a linear predictor composed of the covariate $x_{i}$ and its effect on the outcome $\beta$. 
 
 For illustration purposes, a simulated regression with $n=100$ observations was generated assuming $\beta=0.2$. @fig-regression_simulation shows the scatter plot of the generated data (see code below). The grid approximation method is used to generate random observations from the posterior distribution of $\beta$. Two noteworthy results emerge from the approach. Firstly, once the posterior distribution is generated, various summaries can be used to make inferences about the parameter of interest (refer to the code output below). Secondly, when considering a dataset with $n=100$ observations, the influence of the prior on the posterior distribution of $\beta$ is negligible. Specifically, prior to observe any data, assuming that $\beta$ could take any value within the range of $[-20,+20]$ with equal probability (left panel of @fig-bayesian_inference) did not have a substantial impact on the distribution of $\beta$ after empirical data was observed (right panel of @fig-bayesian_inference).
 
@@ -1418,7 +1449,7 @@ The data comprised the transcriptions of spontaneous speech samples originally c
 
 
 ## Speakers 
-Boonen et al. [-@Boonen_et_al_2021] selected $32$ speakers, comprising $16$ normal hearing children (`NH`) and $16$ hearing-impaired children with cochlear implants (`HI/CI`). At the time of the collection of the speech samples, the `NH` group were between $68$ and $104$ months old ($M = 86.3$, $SD = 9.0$), while `HI/CI` group were between $78$ and $98$ months old ($M = 86.3$, $SD = 6.7$).  
+Boonen et al. [-@Boonen_et_al_2021] selected $32$ speakers, comprising $16$ normal hearing children (NH) and $16$ hearing-impaired children with cochlear implants (HI/CI). At the time of the collection of the speech samples, the NH group were between $68$ and $104$ months old ($M = 86.3$, $SD = 9.0$), while HI/CI group were between $78$ and $98$ months old ($M = 86.3$, $SD = 6.7$).  
 
 
 ## Speech samples 
@@ -1490,7 +1521,7 @@ Lower scores indicated a higher degree of agreement between transcriptions and t
 | **Entropy**   | $0$     |$0.3109$ |$0.6555$ |$0.8277$ |$1$      |
 +---------------+---------+---------+---------+---------+---------+
 
-: Hypothetical alignment of word transcriptions and entropy scores. Note: Extracted from Boonen et al. [-@Boonen_et_al_2021], and slightly modified for illustrative purposes. Entropy scores are calculated the first sentence, produced by the first speaker assigned to the first block, and transcribed by five listeners $\left( s=1, i=1, b=1, J=5 \right)$. Transcriptions are in Dutch with English translation. *[B]* represent a blank space, and *[X]* an unidentifiable speech. {#tbl-alignment .striped .hover}
+: Hypothetical alignment of word transcriptions and entropy scores. Note: Extracted from Boonen et al. [-@Boonen_et_al_2021], and slightly modified for illustrative purposes. Entropy scores are calculated the first sentence, produced by the first speaker assigned to the first block, and transcribed by five listeners $\left( s=1, i=1, b=1, J=5 \right)$. Transcriptions are in Dutch with English translation below. *[B]* represent a blank space, and *[X]* an unidentifiable speech. {#tbl-alignment .striped .hover}
 
 In this context, it is relevant to exemplify the entropy calculation procedure. For that purpose, the words in position two, four and five observed in @tbl-alignment were used. These words were assumed present in the first sentence, produced by the first speaker assigned to the first block, and transcribed by five listeners ($w=\{2,4,5\}$, $s=1$, $i=1$, $b=1$, $J=5$). For the word $2$, the first four listeners identified the word type *jongen* $(T_{j1})$, while the last identified the word type *hond* $(T_{j2})$. Therefore, two word types were identified ($K=2$), with proportions equal to $\{ p_{1}, p_{2} \} = \{ 4/5, 1/5 \} = \{ 0.8, 0.2 \}$, and entropy score equal to:
 
@@ -1509,17 +1540,6 @@ H_{5111} = \frac{ 5 \cdot 0.2 \cdot log_{2}(0.2) }{ log_{2}(5)} = 1
 $$
 
 ## Exploring the data {#subsec-data_exploration}
-
-```{r}
-#| label: code-usd
-#| fig-cap: ''
-#| echo: false
-
-# load functions
-main_dir = '/home/josema/Desktop/1. Work/1 research/PhD Antwerp/#thesis/paper1'
-source( file.path( main_dir, 'real_code', '0_sim_extra.R') )
-
-```
 
 ```{r}
 #| label: code-data_load
@@ -1622,7 +1642,7 @@ psych::describe( speech_samples$Freq ) # <1>
 ```
 1. statistical descriptors for the speech samples
 
-Moreover, the data comprised $16$ normal hearing children (`NH`, hearing status category $1$) and $16$ hearing impaired children, with cochlear implant (`HI/CI`, hearing status category $2$). At the time of the collection of the speech samples, the `NH` group were between $68$ and $104$ months old ($M=86.3$, $SD=9.0$), while `HI/CI` group were between $78$ and $98$ months old ($M=86.3$, $SD=6.7$).
+Moreover, the data comprised $16$ normal hearing children (NH, hearing status category $1$) and $16$ hearing impaired children, with cochlear implant (HI/CI, hearing status category $2$). At the time of the collection of the speech samples, the NH group were between $68$ and $104$ months old ($M=86.3$, $SD=9.0$), while HI/CI group were between $78$ and $98$ months old ($M=86.3$, $SD=6.7$).
 
 ```{r}
 #| label: code-A_HS
@@ -1706,7 +1726,7 @@ $$ {#eq-normal_LMM_linearpred}
 
 where $HS_{i}$ and $A_{i}$ denote the hearing status and chronological age of speaker $i$, respectively. Additionally, $\alpha$ denote the general intercept, $\alpha_{HS[i]}$ represents the average entropy for each hearing status group, and $\beta_{A,HS[i]}$ denotes the evolution of the average entropy per unit of chronological age $A_{i}$ for each hearing status group. Furthermore, $u_{si}$ denotes the sentence-speaker random effects measuring the unexplained entropy variability within sentences for each speaker, $e_{i}$ denotes the speaker random effects describing the unexplained entropy variability between speakers, and $a_{b}$ denotes the block random effects assessing the unexplained variability between experimental blocks.  
 
-Several notably features of the Normal LLM can be discerned from the equations. Firstly, @eq-normal_LMM_likelihood indicates that the variability of the average entropy at the word-level can differ for each speaker, enhancing the model's *robustness* to mild or moderate data departures from the normal distribution assumption, such as heteroscedasticity or outliers (refer to @sec-interlude5). Secondly, @eq-normal_LMM_linearpred reveals that the model assumes no transformation is applied to the relationship between the average entropy and the linear predictor. This is commonly known as a direct link function. Moreover, @eq-normal_LMM_linearpred indicates that chronological age is *centered* around the minimum chronological age in the sample $\bar{A}$. The *centering* procedure is employed to prevent the interpretation of parameters outside the range of chronological ages available in the data [@Everitt_et_al_2010]. Lastly, the equation implies the model considers separate intercept and separate slope of age for each hearing status group, i.e., `NH` and `HI/CI` speakers
+Several notably features of the Normal LLM can be discerned from the equations. Firstly, @eq-normal_LMM_likelihood indicates that the variability of the average entropy at the word-level can differ for each speaker, enhancing the model's *robustness* to mild or moderate data departures from the normal distribution assumption, such as heteroscedasticity or outliers (refer to @sec-interlude5). Secondly, @eq-normal_LMM_linearpred reveals that the model assumes no transformation is applied to the relationship between the average entropy and the linear predictor. This is commonly known as a direct link function. Moreover, @eq-normal_LMM_linearpred indicates that chronological age is *centered* around the minimum chronological age in the sample $\bar{A}$. The *centering* procedure is employed to prevent the interpretation of parameters outside the range of chronological ages available in the data [@Everitt_et_al_2010]. Lastly, the equation implies the model considers separate intercept and separate slope of age for each hearing status group, i.e., NH and HI/CI speakers
 
 ::: {.column-margin}
 **_Centering_** 
@@ -1751,7 +1771,7 @@ $$ {#eq-beta_GLLAMM_structural}
 
 where $\alpha$ defines the general intercept, $\alpha_{HS[i]}$ denotes the potential intelligibility for different hearing status groups, and $\beta_{A,HS[i]}$ indicates the evolution of potential intelligibility per unit of chronological age for each hearing status group. Furthermore, $e_{i}$ represents speakers block effects, describing unexplained potential intelligibility variability between speakers, and $u_{i} = \sum_{s=1}^{S} u_{si}/S$ denotes sentence random effects, assessing the average unexplained potential intelligibility variability among sentences within each speaker, with $S$ denoting the total number of sentences per speaker.
 
-Several features are evident in this probabilistic representations. Firstly, akin to the Normal LMM, @eq-beta_GLLAMM_likelihood reveals that the *dispersion* of average entropy at the word level can differ for each speaker. This enhances the model's robustness to mild or moderate data departures from the beta-proportion distribution assumption (refer to @sec-interlude5). Secondly, in contrast with the Normal LMM, @eq-beta_GLLAMM_linpred shows the potential intelligibility of a speakers has a negative non-linear relationship with the entropy scores, explicitly highlighting the inverse relationship between intelligibility and entropy. This feature also maps the unbounded linear predictor to the bounded limits of the entropy scores. Thirdly, in contrast with the Normal LMM, @eq-beta_GLLAMM_structural demonstrates that the structural parameters are interpretable in terms of the latent potential intelligibility scores, where the scale of the latent trait is set by the general intercept $\alpha$, as required in latent variable models [@Depaoli_2021]. Furthermore, the equation implies the model also considers separate intercept and separate slope of age for each hearing status group, i.e., `NH` and `HI/CI` speakers. Additionally, @eq-beta_GLLAMM_structural indicates that chronological age is *centered* around the minimum chronological age in the sample $\bar{A}$. Lastly, the same equation assumes the intelligibility scores have two sources of unexplained variability: $e_{i}$ and $u_{i}$. The former represents inherent differences in potential intelligibility among different speakers, while the latter assumes that different sentences measure potential intelligibility differently due to variations in word difficulties and their interplay within the sentence.
+Several features are evident in this probabilistic representations. Firstly, akin to the Normal LMM, @eq-beta_GLLAMM_likelihood reveals that the *dispersion* of average entropy at the word level can differ for each speaker. This enhances the model's robustness to mild or moderate data departures from the beta-proportion distribution assumption (refer to @sec-interlude5). Secondly, in contrast with the Normal LMM, @eq-beta_GLLAMM_linpred shows the potential intelligibility of a speakers has a negative non-linear relationship with the entropy scores, explicitly highlighting the inverse relationship between intelligibility and entropy. This feature also maps the unbounded linear predictor to the bounded limits of the entropy scores. Thirdly, in contrast with the Normal LMM, @eq-beta_GLLAMM_structural demonstrates that the structural parameters are interpretable in terms of the latent potential intelligibility scores, where the scale of the latent trait is set by the general intercept $\alpha$, as required in latent variable models [@Depaoli_2021]. Furthermore, the equation implies the model also considers separate intercept and separate slope of age for each hearing status group, i.e., NH and HI/CI speakers. Additionally, @eq-beta_GLLAMM_structural indicates that chronological age is *centered* around the minimum chronological age in the sample $\bar{A}$. Lastly, the same equation assumes the intelligibility scores have two sources of unexplained variability: $e_{i}$ and $u_{i}$. The former represents inherent differences in potential intelligibility among different speakers, while the latter assumes that different sentences measure potential intelligibility differently due to variations in word difficulties and their interplay within the sentence.
 
 
 ## Prior distributions {#sec-priors}
@@ -4551,71 +4571,86 @@ for(i in 1:12){
 
 This research question evaluates the effectiveness of the Beta-proportion GLLAMM in handling the features of entropy scores by comparing its predictive accuracy to the Normal LMM. Models $1$, $4$, $7$, and $10$ are specifically chosen for this comparison because their assumptions exclusively address the features of the scores, without integrating additional covariate information. As detailed in @tbl-fitted, Model $1$ is a Normal LMM that solely addresses data clustering. Building upon this, Model $4$ introduces a robust feature. Conversely, Model $7$ is a Beta-proportion GLLAMM that deals with boundedness, measurement error and data clustering, and Model $10$ extends this model by incorporating a robust feature. 
 
-@fig-RQ1_WAIC.PSIS displays values for the `DIC`, `WAIC`, and `PSIS`. They also include the components `dWAIC` and `dPSIS`, highlighting the differences in out-of-sample deviations from the best-fitting model and its associated uncertainty. The associated tables provide similar information, while also reporting the `pWAIC` and `pPSIS` values, indicating the penalization received by the models for their complexity (roughly associated with their number of parameters). Lastly, the tables show the `weight` of evidence, which summarizes the relative support for each model.
+@fig-RQ1_WAIC.PSIS displays values for the `DIC`, `WAIC`, and `PSIS`. They also include the components `dWAIC` and `dPSIS`, highlighting the differences in out-of-sample deviations from the best-fitting model and its associated uncertainty. The associated @tbl-rq1-waic and @tbl-rq1-psis provide similar information, while also reporting the `pWAIC` and `pPSIS` values, indicating the penalization received by the models for their complexity (roughly associated with their number of parameters). Lastly, the tables show the `weight` of evidence, which summarizes the relative support for each model.
 
-Overall, all criteria consistently point to Model $10$ as the most plausible choice for the data. The model exhibits the lowest values for both `WAIC` and `PSIS`, establishing itself as the model with the least deviation from *perfect* predictive accuracy among those under comparison. Additionally, @fig-RQ1_WAIC.PSIS visually demonstrates the non-overlapping uncertainty (horizontal blue lines) in both `dWAIC` and `dPSIS` values for Models $1$, $4$, and $7$ when compared to Model $10$. This indicates that Model $10$ significantly deviates the least from *perfect* predictive accuracy when compared to the rest of the models. Lastly, the `weight` of evidence in the tables underscores that $100\%$ of the evidence aligns with and supports Model $10$.
+Overall, all criteria consistently point to Model $10$ as the most plausible choice for the data. The model exhibits the lowest values for both `WAIC` and `PSIS`, establishing itself as the model with the least deviation from *perfect* predictive accuracy among those under comparison. Additionally, @fig-RQ1_WAIC.PSIS visually demonstrates the non-overlapping uncertainty (horizontal blue lines) in both `dWAIC` and `dPSIS` values for Models $1$, $4$, and $7$ when compared to Model $10$. This indicates that Model $10$ significantly deviates the least from *perfect* predictive accuracy when compared to the rest of the models. Lastly, the `weight` of evidence in @tbl-rq1-waic and @tbl-rq1-psis underscores that $100\%$ of the evidence aligns with and supports Model $10$.
 
 ```{r}
+#| output: false
 #| label: code-RQ1_WAIC
 #| fig-cap: ''
 
-require(rethinking) # <1>
+set.seed(12345) # <1>
 
-set.seed(12345) # <2>
-
-RQ1_WAIC = compare( func=WAIC, # <3>
+RQ1_WAIC = compare( func=WAIC, # <2>
                     model01, model04,
                     model07, model10 )
-RQ1_WAIC = cbind( DIC=with(RQ1_WAIC, WAIC-2*pWAIC), # <4>
+RQ1_WAIC = cbind( DIC=with(RQ1_WAIC, WAIC-2*pWAIC), # <3>
                   RQ1_WAIC )
 
-round( RQ1_WAIC, 3)
-
 ```
-1. package requirement
-2. seed for replication
-3. comparison of selected models with WAIC
-4. DIC calculation
+1. seed for replication
+2. comparison of selected models with WAIC
+3. DIC calculation
+
 
 ```{r}
+#| output: false
 #| label: code-RQ1_PSIS
 #| fig-cap: ''
 
-require(rethinking) # <1>
+set.seed(12345) # <1>
 
-set.seed(12345) # <2>
-
-RQ1_PSIS = compare( func=PSIS, # <3>
+RQ1_PSIS = compare( func=PSIS, # <2>
                     model01, model04,
                     model07, model10 )
-RQ1_PSIS = cbind( DIC=with(RQ1_PSIS, PSIS-2*pPSIS), # <4>
+RQ1_PSIS = cbind( DIC=with(RQ1_PSIS, PSIS-2*pPSIS), # <3>
                   RQ1_PSIS )
 
-round( RQ1_PSIS, 3)
-
 ```
-1. package requirement
-2. seed for replication
-3. comparison of selected models with PSIS
-4. DIC calculation
+1. seed for replication
+2. comparison of selected models with PSIS
+3. DIC calculation
 
 
 ```{r}
 #| label: fig-RQ1_WAIC.PSIS
 #| fig-cap: 'WAIC and PSIS model comparison plot. Note: Black and blue points describe point estimates, and continuous horizontal lines indicate the associated uncertainty.'
-#| fig-height: 7
-#| fig-width: 6
+#| fig-height: 4
+#| fig-width: 10
 
-par(mfrow=c(2,1))
+par(mfrow=c(1,2))
 plot_compare( compare_obj=RQ1_WAIC, # <1>
               ns=1, m='WAIC', dm=T )
-
 plot_compare( compare_obj=RQ1_PSIS, 
               ns=1, m='PSIS', dm=T )
 par(mfrow=c(1,1))
 
 ```
 1. user defined function: plot of Deviance, WAIC, PSIS, and dWAIC with confidence intervals
+
+
+```{r}
+#| label: tbl-rq1-waic
+#| tbl-cap: "WAIC comparison for selected models"
+
+RQ1_WAIC$Model = as.integer( str_sub( rownames(RQ1_WAIC), start=-2) )
+
+kable( round( RQ1_WAIC[,c(8,1:7)], 3), row.names=F, align='crrrrrrr', 
+       escape=F, digits=2 )
+
+```
+
+```{r}
+#| label: tbl-rq1-psis
+#| tbl-cap: "PSIS comparison for selected models"
+
+RQ1_PSIS$Model = as.integer( str_sub( rownames(RQ1_PSIS), start=-2) )
+
+kable( round( RQ1_PSIS[,c(8,1:7)], 3), row.names=F, align='crrrrrrr', 
+       escape=F, digits=2 )
+
+```
 
 Upon closer examination, the reasons behind the observed disparities in the models become more apparent. Specifically, @fig-RQ1_pred_speaker highlights that the Normal LMM, as outlined in Model $4$, fails to capture the underlying data patterns, resulting in predictions that are physically inconsistent, falling outside the outcome's range between zero and one. Further insight into this issue is provided by @fig-RQ1_pred_speaker_model04 and @fig-RQ1_model_outliers. @fig-RQ1_pred_speaker_model04 displays Model $4$'s score prediction densities which bear no resemblance to the actual data densities. Furthermore, the top two panels in @fig-RQ1_model_outliers reveal that misspecification in the Normal LMM causes the model to be *more surprised* by 'extreme' entropy scores, leading to their identification as highly unlikely and influential observations. Consequently, the model is rendered unreliable due to the potential biases present in the parameter estimates. In contrast, the Beta-proportion GLLAMM appears to effectively capture the data patterns, generating predictions within the expected data range. This is evident in @fig-RQ1_pred_speaker and complemented by @fig-RQ1_pred_speaker_model10 and @fig-RQ1_model_outliers. In @fig-RQ1_pred_speaker_model10, Model $10$ display prediction densities that bear more resemblance to the actual data densities. Furthermore, the bottom two panels in @fig-RQ1_model_outliers show the model is *less surprised* by 'extreme' scores, fostering more trust in the model's estimates.
 
@@ -4695,7 +4730,7 @@ $$ {#eq-beta_GLLAMM_structural_model10}
 
 Moreover, due to its implementation under Bayesian procedures, Model $10$ provides the complete posterior distribution of the speakers' potential intelligibility scores. This provision, in turn, (1) enables the calculation of summaries, facilitating the ranking of individuals, and (2) supports the assessment of differences among selected speakers. In both cases, the model considers the inherent uncertainty of the estimates resulting from its measurement using multiple entropy scores.
 
-@fig-RQ2_SImodel10 and the associated table display the ranking of speakers in decreasing order based on point estimates of the latent potential intelligibility. These estimates are accompanied by their associated $95\%$ highest probability density intervals (HPDI). Both the table and figure clearly indicate that speaker $6$ stands out as the least intelligible in the sample, followed farther behind by speaker $1$, $17$ and $9$. In contrast, the figure highlights speaker $20$ as the most intelligible, closely followed by speakers $23$, $31$ and $3$. Conversely, @fig-SI_contr_model10 and its associated table show summaries and the full posterior distribution for the comparison of potential intelligibility among selected speakers. The table and figure reveal that only the differences between speakers $6$, $1$, $17$, and $9$, along with the difference between speakers $20$ and $3$ are statistically significant, as their associated $95\%$ HPDI did not overlap with zero (shaded area).
+@tbl-rq2-si-model10 and @fig-RQ2_SImodel10 display the ranking of speakers in decreasing order based on point estimates of the latent potential intelligibility. These estimates are accompanied by their associated $95\%$ highest probability density intervals (HPDI). Both the table and figure clearly indicate that speaker $6$ stands out as the least intelligible in the sample, followed farther behind by speaker $1$, $17$ and $9$. In contrast, the figure highlights speaker $20$ as the most intelligible, closely followed by speakers $23$, $31$ and $3$. Conversely, @tbl-si-contr-model10 and @fig-SI_contr_model10 show summaries and the full posterior distribution for the comparison of potential intelligibility among selected speakers. The table and figure reveal that only the differences between speakers $6$, $1$, $17$, and $9$, along with the difference between speakers $20$ and $3$ are statistically significant, as their associated $95\%$ HPDI did not overlap with zero (shaded area).
 
 
 ```{r}
@@ -4704,16 +4739,27 @@ Moreover, due to its implementation under Bayesian procedures, Model $10$ provid
 
 SI = pred_SI(d=data_H, stanfit_obj=model10, p=0.95) # <1>
 SI = SI[order(SI$mean, decreasing=T), ]
-SI[,c(1:5,9:10)]
+SI = round(SI, 3)
+SI$HPDI = paste0('[', SI$HPDI_lower, ', ', SI$HPDI_upper,']')
 
 ```
 1. user-defined function: retrieves SI scores for selected models
 
+```{r}
+#| label: tbl-rq2-si-model10
+#| tbl-cap: "Latent potential Intelligibility and additional covariates"
+
+kable( SI[,c(1:5,11)], align='rrrrrr', row.names=F, digits=3,
+       col.names=c('Speaker ID','Hearing status',
+                   'Chron. Age','Chron. Age (centered)',
+                   'Posterior mean','95% HPDI') )
+
+```
 
 ```{r}
 #| label: fig-RQ2_SImodel10
 #| fig-cap: 'Model 10, latent potential intelligibility of speakers. Note: Black dots and vertical lines show mean point estimates and 95% HPDI intervals.'
-#| fig-height: 4
+#| fig-height: 5
 #| fig-width: 10
 
 plot_SI(d=data_H, stanfit_obj=model10, # <1>
@@ -4727,14 +4773,25 @@ plot_SI(d=data_H, stanfit_obj=model10, # <1>
 #| label: code-SI_contr_model10
 #| fig-cap: ''
 
-SI_contr = contrast_SI(d=data_H, stanfit_obj=model10, # <1> 
-                       speakers=c(6,20), p=0.95, raw=T)
-idx_comp = c(1,21,13,52,60,6)
-SI_contr$SI_contr[idx_comp,c(1,5:6)]
+SI = contrast_SI(d=data_H, stanfit_obj=model10, # <1>
+                 speakers=c(6,20), p=0.95, raw=T)
+SI_contr = SI$SI_contr
+SI_contr = round(SI_contr, 3)
+SI_contr$names = rownames(SI_contr)
+SI_contr$HPDI = paste0('[', SI_contr$HPDI_lower, ', ', SI_contr$HPDI_upper,']')
 
 ```
 1. user defined function: produce potential intelligibility contrast among selected speakers
 
+```{r}
+#| label: tbl-si-contr-model10
+#| tbl-cap: "Latent potential intelligibility contrasts of selected speakers"
+
+idx_comp = c(1,21,13,52,60,6)
+kable( SI_contr[idx_comp,c('names','mean','HPDI')], row.names=F, align='ccc',
+       col.names=c('Contrasts','Posterior mean','95% HPDI') )
+
+```
 
 ```{r}
 #| label: fig-SI_contr_model10
@@ -4747,11 +4804,11 @@ require(rethinking)
 par(mfrow=c(2,3))
 
 for(i in idx_comp){
-  dens( SI_contr$SI_raw[[i]], xlim=c(-2.5,2.5), # <1>
+  dens( SI$SI_raw[[i]], xlim=c(-2.5,2.5), # <1>
         col=rgb(0,0,0,0.7), show.HPDI=0.95,
         xlab='Difference in potential intelligibility')
   abline( v=0, lty=2, col=rgb(0,0,0,0.3))
-  mtext( text=names(SI_contr$SI_raw)[i], side=3, adj=0, cex=1.1)
+  mtext( text=names(SI$SI_raw)[i], side=3, adj=0, cex=1.1)
 }
 
 par(mfrow=c(1,1))
@@ -4764,73 +4821,88 @@ par(mfrow=c(1,1))
 
 This research question illustrates how theories on intelligibility can be examined within the model's framework. Specifically, the focus centers on assessing the influence of speaker-related factors on intelligibility, such as chronological age and hearing status. Notably, despite RQ1 indicating the suitability of Beta-proportion GLLAMM models for entropy scores, existing statistical literature suggests that, in certain scenarios, models incorporating covariate adjustment exhibit robustness to misspecification in the functional form linking an outcome and covariates, commonly referred to as covariate-outcome relationship [@Tackney_et_al_2023]. Consequently, this study compares all models detailed in @tbl-fitted. These models are characterized by different covariate adjustments on entropy scores or the latent potential intelligibility of speakers, namely chronological age and hearing status, while potentially exhibiting misspecification in the covariate-outcome relationship, as observed in the case of the Normal LMM. 
 
-Similar to RQ1, all criteria consistently identify the Beta-proportion GLLAMM outlined in models $11$, $12$ and $10$ as the most plausible models for the data. The models exhibit the lowest values for both `WAIC` and `PSIS`, establishing them as the least deviating models among those under comparison. Moreover, @fig-RQ3_WAIC.PSIS depicts with horizontal blue lines the non-overlapping uncertainty for the models' `dWAIC` and `dPSIS` values. This reveals that, when compared to Model $11$, most models exhibit significantly distinct predictive capabilities. Models $12$ and $10$, however, stand out as exceptions to this pattern. This observation suggests that Models $11$, $12$, and $10$ display the least deviation from *perfect* predictive accuracy in contrast to the other models. Lastly, the `weight` of evidence in the tables, underscores that Model $11$ accumulated the greatest support, followed by Model $12$, and lastly, by Model $10$.
+Similar to RQ1, all criteria consistently identify the Beta-proportion GLLAMM outlined in models $11$, $12$ and $10$ as the most plausible models for the data. The models exhibit the lowest values for both `WAIC` and `PSIS`, establishing them as the least deviating models among those under comparison. Moreover, @fig-RQ3_WAIC.PSIS depicts with horizontal blue lines the non-overlapping uncertainty for the models' `dWAIC` and `dPSIS` values. This reveals that, when compared to Model $11$, most models exhibit significantly distinct predictive capabilities. Models $12$ and $10$, however, stand out as exceptions to this pattern. This observation suggests that Models $11$, $12$, and $10$ display the least deviation from *perfect* predictive accuracy in contrast to the other models. Lastly, the `weight` of evidence in @tbl-rq3-waic and tbl-rq3-psis, underscores that Model $11$ accumulated the greatest support, followed by Model $12$, and lastly, by Model $10$.
 
 ```{r}
+#| output: false
 #| label: code-RQ3_WAIC
 #| fig-cap: ''
 
-require(rethinking) # <1>
+set.seed(12345) # <1>
 
-set.seed(12345) # <2>
-
-RQ3_WAIC = compare( func=WAIC, # <3>
+RQ3_WAIC = compare( func=WAIC, # <2>
                     model01, model02, model03,
                     model04, model05, model06,
                     model07, model08, model09,
                     model10, model11, model12 )
-RQ3_WAIC = cbind( DIC=with(RQ3_WAIC, WAIC-2*pWAIC), # <4>
+RQ3_WAIC = cbind( DIC=with(RQ3_WAIC, WAIC-2*pWAIC), # <3>
                   RQ3_WAIC )
 
-round( RQ3_WAIC, 3)
-
 ```
-1. package requirement
-2. seed for replication
-3. comparison of selected models with WAIC
-4. DIC calculation
+1. seed for replication
+2. comparison of selected models with WAIC
+3. DIC calculation
 
 
 ```{r}
+#| output: false
 #| label: code-RQ3_PSIS
 #| fig-cap: ''
 
-require(rethinking) # <1>
+set.seed(12345) # <1>
 
-set.seed(12345) # <2>
-
-RQ3_PSIS = compare( func=PSIS, # <3>
+RQ3_PSIS = compare( func=PSIS, # <2>
                     model01, model02, model03,
                     model04, model05, model06,
                     model07, model08, model09,
                     model10, model11, model12 )
-RQ3_PSIS = cbind( DIC=with(RQ3_PSIS, PSIS-2*pPSIS), # <4>
+RQ3_PSIS = cbind( DIC=with(RQ3_PSIS, PSIS-2*pPSIS), # <3>
                   RQ3_PSIS )
 
-round( RQ3_PSIS, 3)
-
 ```
-1. package requirement
-2. seed for replication
-3. comparison of selected models with PSIS
-4. DIC calculation
+1. seed for replication
+2. comparison of selected models with PSIS
+3. DIC calculation
+
 
 ```{r}
 #| label: fig-RQ3_WAIC.PSIS
 #| fig-cap: 'WAIC and PSIS model comparison plot. Note: Black and blue points describe point estimates, and continuous horizontal lines indicate the associated uncertainty.'
-#| fig-height: 12
-#| fig-width: 6
+#| fig-height: 8
+#| fig-width: 10
 
-par(mfrow=c(2,1))
+par(mfrow=c(1,2))
 plot_compare( compare_obj=RQ3_WAIC, # <1>
               ns=1, m='WAIC', dm=T ) 
-
 plot_compare( compare_obj=RQ3_PSIS, 
               ns=1, m='PSIS', dm=T )
 par(mfrow=c(1,1))
 
 ```
 1. user defined function: plot of Deviance, WAIC, PSIS, and dWAIC with confidence intervals
+
+
+```{r}
+#| label: tbl-rq3-waic
+#| tbl-cap: "WAIC comparison for all models"
+
+RQ3_WAIC$Model = as.integer( str_sub( rownames(RQ3_WAIC), start=-2) )
+
+kable( round( RQ3_WAIC[,c(8,1:7)], 3), row.names=F, align='crrrrrrr', 
+       escape=F, digits=2 )
+
+```
+
+```{r}
+#| label: tbl-rq3-psis
+#| tbl-cap: "PSIS comparison for all models"
+
+RQ3_PSIS$Model = as.integer( str_sub( rownames(RQ3_PSIS), start=-2) )
+
+kable( round( RQ3_PSIS[,c(8,1:7)], 3), row.names=F, align='crrrrrrr', 
+       escape=F, digits=2 )
+
+```
 
 A closer examination of two models within this comparison set reveal the reasons behind the largest observed disparities. The Normal LMM, as outlined in Model $6$, continues to face challenges in capturing underlying data patterns, resulting in predictions that are physically inconsistent, falling outside the outcome's range. Additionally, the model persists in identifying highly unlikely and influential observations, making it inherently unreliable. In contrast, the Beta-proportion GLLAMM described by Model $12$ appears to be less susceptible to 'extreme' scores, effectively capturing data patterns within the expected data range and thereby instilling greater confidence in the reliability of the model's estimates. This contrast is visually depicted in @fig-RQ3_pred_speaker, @fig-RQ3_pred_speaker_model06, @fig-RQ3_pred_speaker_model12, and @fig-RQ3_model_outliers.
 
@@ -4897,25 +4969,39 @@ par(mfrow=c(1,1))
 1. user defined function: outliers identification for selected model
 
 
-Considering the results in @fig-RQ3_WAIC.PSIS, the model comparisons favor three distinct models: Model $10$, $11$ and $12$. Model $10$, supported by $20.4\%$ of the evidence, estimates a single intercept $\alpha$ and no slope to explain the potential intelligibility of speakers (refer to associated table). In contrast, supported by $45.1\%$ of the evidence, Model $11$ estimates distinct intercepts for each hearing status group, namely $\alpha_{HS[1]}$ for `NH` speakers and $\alpha_{HS[2]}$ for the `HI/CI` counterparts, while maintaining a single slope that gauges the impact of age on potential intelligibility estimates. The $95\%$ HPDI for the comparison of intercepts $\alpha_{HS[2]}-\alpha_{HS[1]}$ reveal significant differences between `NH` and `HI/CI` speakers. Lastly, with evidence of $34.1\%$, Model $12$ estimates one intercept and slope per hearing status group, namely $\alpha_{HS[1]}$ and $\beta_{A,HS[1]}$ for the `NH` speakers, and $\alpha_{HS[2]}$ and $\beta_{A,HS[2]}$ for the `HI/CI` counterparts. The $95\%$ HPDI for the comparison of intercepts and slopes reveal significant differences solely in the slopes between `NH` and their `HI/CI` counterparts ($\beta_{A,HS[2]}-\beta_{A,HS[1]}$).
+Considering the results in @tbl-rq3-waic, @tbl-rq3-psis, and @fig-RQ3_WAIC.PSIS, the model comparisons favor three distinct models: Model $10$, $11$ and $12$. Model $10$, supported by $20.4\%$ of the evidence, estimates a single intercept $\alpha$ and no slope to explain the potential intelligibility of speakers (@tbl-parameter-model10). In contrast, supported by $45.1\%$ of the evidence, Model $11$ estimates distinct intercepts for each hearing status group, namely $\alpha_{HS[1]}$ for NH speakers and $\alpha_{HS[2]}$ for the HI/CI counterparts, while maintaining a single slope that gauges the impact of age on potential intelligibility estimates. The $95\%$ HPDI for the comparison of intercepts $\alpha_{HS[2]}-\alpha_{HS[1]}$ reveal significant differences between NH and HI/CI speakers (@tbl-parameter-model11). Lastly, with evidence of $34.1\%$, Model $12$ estimates one intercept and slope per hearing status group, namely $\alpha_{HS[1]}$ and $\beta_{A,HS[1]}$ for the NH speakers, and $\alpha_{HS[2]}$ and $\beta_{A,HS[2]}$ for the HI/CI counterparts. The $95\%$ HPDI for the comparison of intercepts and slopes reveal significant differences solely in the slopes between NH and their HI/CI counterparts ($\beta_{A,HS[2]}-\beta_{A,HS[1]}$, see @tbl-parameter-model12).
 
-However, a discerning reader can notice that these models yield conflicting conclusions regarding the influence of chronological age and hearing status on intelligibility. Model $10$ implies no influence of chronological age and hearing status on the potential intelligibility of speakers. A visual inspection of @fig-RQ3_intelligibility_model10, however, reveals the reason for the model's low support. Model $10$ fails to capture the prevalent increasing age pattern observed in potential intelligibility estimates. In contrast, Model $11$ identifies significant differences in potential intelligibility between `NH` and `HI/CI` speakers. The model further suggests that with the progression of chronological age, `HI/CI` speakers lag behind in intelligibility development, with no opportunity to catch up to their `NH` counterparts within the analyzed age range, as depicted in @fig-RQ3_intelligibility_model11. Finally, Model $12$ indicates no significant differences in intelligibility between `NH` and `HI/CI` speakers at $68$ months of age (around $6$ years old). However, the model reveals distinct evolution patterns of intelligibility per unit of chronological age between different hearing status groups, with `HI/CI` speakers displaying a slower rate of development compared to their `NH` counterparts within the analyzed age range. The latter is evident in @fig-RQ3_intelligibility_model12.
+However, a discerning reader can notice that these models yield conflicting conclusions regarding the influence of chronological age and hearing status on intelligibility. Model $10$ implies no influence of chronological age and hearing status on the potential intelligibility of speakers. A visual inspection of @fig-RQ3_intelligibility_model10, however, reveals the reason for the model's low support. Model $10$ fails to capture the prevalent increasing age pattern observed in potential intelligibility estimates. In contrast, Model $11$ identifies significant differences in potential intelligibility between NH and HI/CI speakers. The model further suggests that with the progression of chronological age, HI/CI speakers lag behind in intelligibility development, with no opportunity to catch up to their NH counterparts within the analyzed age range, as depicted in @fig-RQ3_intelligibility_model11. Finally, Model $12$ indicates no significant differences in intelligibility between NH and HI/CI speakers at $68$ months of age (around $6$ years old). However, the model reveals distinct evolution patterns of intelligibility per unit of chronological age between different hearing status groups, with HI/CI speakers displaying a slower rate of development compared to their NH counterparts within the analyzed age range. The latter is evident in @fig-RQ3_intelligibility_model12.
 
 ```{r}
 #| label: code-parameter_model10
 #| fig-cap: ''
 
-print('Model 10')
-
 par_int = c('a','aHS[1]','aHS[2]','bAm','bAmHS[1]','bAmHS[2]') # <1>
-
 model_par = par_recovery(stanfit_obj=model10, # <2>
                          p=0.95, est_par=par_int)
-model_par[,c(1,5:6)]
+
+vars_int = c('mean','HPDI_lower','HPDI_upper')
+model_tab = model_par[,vars_int]
+model_tab = round(model_tab, 2)
+model_tab$names = c('$\\alpha$')
+model_tab$HPDI = paste0('[', model_tab$HPDI_lower, ', ', model_tab$HPDI_upper,']')
 
 ```
 1. parameters of interest
 2. user defined function: recovers the hearing status and chronological age parameter estimates for selected model
+
+```{r}
+#| label: tbl-parameter-model10
+#| tbl-cap: "Model 10, parameter estimates and 95% highest probability density intervals (HPDI)"
+
+vars_tab = c('names','mean','HPDI')
+opts = options(knitr.kable.NA="")
+kable( model_tab[,vars_tab], row.names=F, align='ccc', 
+       escape=F, digits=3,
+       col.names=c('Parameter','Posterior mean','95% HPDI') )
+
+```
 
 ```{r}
 #| label: fig-RQ3_intelligibility_model10
@@ -4935,28 +5021,39 @@ pred_intel(d=data_H, stanfit_obj=model10, # <1>
 #| label: code-parameter_model11
 #| fig-cap: ''
 
-print('Model 11')
-
 par_int = c('a','aHS[1]','aHS[2]','bAm','bAmHS[1]','bAmHS[2]') # <1>
-
 model_par = par_recovery(stanfit_obj=model11, # <2>
                          p=0.95, est_par=par_int)
-model_par[,c(1,5:6)]
+contrs = contrast_intel(stanfit_obj=model11, p=0.95, # <3>
+                        rope=c(-0.05,0.05))
+
+vars_int = c('mean','HPDI_lower','HPDI_upper')
+model_tab = rbind(model_par[,vars_int], rep(NA,3), rep(NA,3), contrs[,vars_int])
+model_tab = round(model_tab, 2)
+model_tab$names = c('$\\alpha$','$\\alpha_{HS[1]}$','$\\alpha_{HS[2]}$',
+                    '$\\beta_{A}$', NA,
+                    'Contrasts','$\\alpha_{HS[2]} - \\alpha_{HS[1]}$')
+model_tab$HPDI = paste0('[', model_tab$HPDI_lower, ', ', model_tab$HPDI_upper,']')
+model_tab[5, 1:5] = NA
+model_tab[6, c(1:3,5)] = NA
 
 ```
 1. parameters of interest
 2. user defined function: recovers the hearing status and chronological age parameter estimates for selected model
+3. user defined function: extracts contrast of interest from selected model
 
 ```{r}
-#| label: code-contrast_model11
-#| fig-cap: ''
+#| label: tbl-parameter-model11
+#| tbl-cap: "Model 11, parameter estimates and 95% highest probability density intervals (HPDI)"
 
-contrs = contrast_intel(stanfit_obj=model11, p=0.95, # <1>
-                        rope=c(-0.05,0.05))
-contrs[,c(1,5:6)]
+vars_tab = c('names','mean','HPDI')
+opts = options(knitr.kable.NA = "")
+kable( model_tab[,vars_tab], row.names=F, align='ccc', 
+       escape=F, digits=3,
+       col.names=c('Parameter','Posterior mean','95% HPDI') )
 
 ```
-1. user defined function: extracts parameters of interest from selected model
+
 
 ```{r}
 #| label: fig-RQ3_intelligibility_model11
@@ -4976,27 +5073,40 @@ pred_intel(d=data_H, stanfit_obj=model11, # <1>
 #| label: code-parameter_model12
 #| fig-cap: ''
 
-print('Model 12')
-
 par_int = c('a','aHS[1]','aHS[2]','bAm','bAmHS[1]','bAmHS[2]') # <1>
+model_par = par_recovery(stanfit_obj=model12, # <2>
+                         p=0.95, est_par=par_int)
+contrs = contrast_intel(stanfit_obj=model12, p=0.95, # <3>
+                        rope=c(-0.05,0.05))
 
-model_par = par_recovery(stanfit_obj=model12, # <1>
-                         p=0.95, est_par=par_int) 
-model_par[,c(1,5:6)]
+vars_int = c('mean','HPDI_lower','HPDI_upper')
+model_tab = rbind(model_par[,vars_int], rep(NA,3), rep(NA,3), contrs[,vars_int])
+model_tab = round(model_tab, 2)
+model_tab$names = c('$\\alpha$','$\\alpha_{HS[1]}$','$\\alpha_{HS[2]}$',
+                    '$\\beta_{A,HS[1]}$','$\\beta_{A,HS[2]}$', NA,
+                    'Contrasts','$\\alpha_{HS[2]} - \\alpha_{HS[1]}$',
+                    '$\\beta_{A,HS[2]} - \\beta_{A,HS[1]}$')
+model_tab$HPDI = paste0('[', model_tab$HPDI_lower, ', ', model_tab$HPDI_upper,']')
+model_tab[6, 1:5] = NA
+model_tab[7, c(1:3,5)] = NA
 
 ```
-1. user defined function: extracts parameters of interest from selected model
+1. parameters of interest
+2. user defined function: recovers the hearing status and chronological age parameter estimates for selected model
+3. user defined function: extracts contrast of interest from selected model
 
 ```{r}
-#| label: code-contrast_model12
-#| fig-cap: ''
+#| label: tbl-parameter-model12
+#| tbl-cap: "Model 12, parameter estimates and 95% highest probability density intervals (HPDI)"
 
-contrs = contrast_intel(stanfit_obj=model12, p=0.95, # <1>
-                        rope=c(-0.05,0.05))
-contrs[,c(1,5:6)]
+vars_tab = c('names','mean','HPDI')
+opts = options(knitr.kable.NA = "")
+kable( model_tab[,vars_tab], row.names=F, align='ccc', 
+       escape=F, digits=3,
+       col.names=c('Parameter','Posterior mean','95% HPDI') )
 
 ```
-1. user defined function: extracts parameters of interest from selected model
+
 
 ```{r}
 #| label: fig-RQ3_intelligibility_model12
@@ -5009,7 +5119,6 @@ pred_intel(d=data_H, stanfit_obj=model12, # <1>
 
 ```
 1. user defined function: plot potential intelligibility per age and hearing status for selected model
-
 
 
 
@@ -5407,34 +5516,30 @@ Conversely, a second avenue for exploration involves integrating diverse data ty
 This study highlights the effectiveness of the Bayesian Beta-proportion GLLAMM to collectively address several key data features when investigating unobservable and complex traits, using speech intelligibility and entropy scores as an example. The results demonstrate the proposed model consistently outperforms the Normal LMM in predicting the empirical phenomena. Moreover, it exhibits the ability to quantify the latent potential intelligibility of speakers, allowing for the ranking and comparison of individuals based on the latent trait while accommodating associated uncertainties. Additionally, the proposed model facilitates the exploration of research theories concerning the influence of speaker-related factors on potential intelligibility. The study indicates that integrating and comparing these theories within the model's framework is a straightforward task. However, the introduction of these innovative statistical tools presents new challenges for researchers seeking implementation. These challenges encompass the principled formulation of assumptions about the data-generating processes and research inquiries, along with the need for familiarity with probabilistic programming languages (PPLs) essential for implementing Bayesian methods. Nevertheless, the study suggests several promising avenues for future research, including power analysis, causal hypothesis formulation, and exploration and integration of novel evaluation methods for assessing intelligibility. The insights derived from this study hold implications for both researchers and data analysts interested in quantitatively measuring and testing theories related to nuanced, unobservable constructs, while also considering the appropriate prediction of the empirical phenomena. 
 
 
+{{< pagebreak >}}
 
-<!-- # Journal (to erase) -->
+# Declarations {.unnumbered}
 
-<!-- Things to consider -->
+**Funding:** The project was founded through the Research Fund of the University of Antwerp (BOF).
 
-<!-- 1. it is important to address the issue of statistical power. (Need to be addressed) -->
+**Conflict of interests:** The authors declare no conflict of interest.
 
-<!-- 2. Multiple NHST tests inflate null-hypothesis rejection rates. (NO need to address because of Bayesian) -->
+**Ethics approval:** This is an observational study. The University of Antwerp Research Ethics Committee has confirmed that no ethical approval is required.
 
-<!-- a. p-hacking (NO issues) -->
+**Consent to participate:** Not applicable
 
-<!-- b. dropping observation (NO issues) -->
+**Consent for publication:** All authors have read and agreed to the published version of the manuscript.
 
-<!-- c. covariate analysis (NO issues, mention they are exploratory) -->
+**Availability of data and materials:** The data is delivered upon request, while the user-defined functions are available in the `code` folder from this walk-through [repository](https://github.com/jriveraespejo/betaprop.walkthrough.github.io)
 
-<!-- 3. Rich descriptions of the data help reviewers, the Editor, and other readers understand your findings. (already done) -->
+**Code availability:** The code is available this  [walk-through](https://jriveraespejo.github.io/betaprop.walkthrough.github.io/).
 
-<!-- 4. Cherry picking experiments, conditions, DVs, or observations can be misleading. (NO issues) -->
-
-<!-- 5. Be careful about using null results to infer "boundary conditions" for an effect. (NO issues) -->
-
-<!-- 6. Authors should use statistical methods that best describe and convey the properties of their data. (already done) -->
-
-<!-- Follow [Behavior research methods](https://www.springer.com/journal/13428/submission-guidelines#Instructions%20for%20Authors_Behavior%20Research%20Methods%20General%20Information) for more information. -->
+**Authors' contributions:** *Conceptualization:* S.G., S.dM., and J.M.R.E; *Data curation:* J.M.R.E.; *Formal Analysis:* J.M.R.E.; *Funding acquisition:* S.G. and S.dM; *Investigation:* S.G.; *Methodology:* S.G., S.dM., and J.M.R.E; *Project administration:* S.G. and S.dM.; *Resources:* S.G. and S.dM.; *Software: J.M.R.E.*; *Supervision:* S.G. and S.dM.; *Validation:* J.M.R.E.; *Visualization:* J.M.R.E.; *Writing - original draft:* J.M.R.E.; *Writing - review & editing:* S.G. and S.dM.
 
 
+{{< pagebreak >}}
 
-# References
+# References {.unnumbered}
 
 ::: {#refs}
 :::
