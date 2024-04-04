@@ -72,8 +72,8 @@ format:
     csl: apa-6th-edition.csl
     keep-tex: true
     embed-resources: true
-    link-external-icon: true
-    link-external-newwindow: false
+    link-external-icon: false
+    link-external-newwindow: true
     page-layout: article
     theme: 
       light: materia
