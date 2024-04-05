@@ -53,7 +53,7 @@ format:
     link-external-newwindow: true
     page-layout: article
     theme: cosmo
-    fontsize: 12pt
+    # fontsize: 12pt
     smooth-scroll: true
     toc: true
     toc-depth: 3
