@@ -79,15 +79,15 @@ format:
 ---
 
 # Aim
-The purpose of this Additional Notebook is to improve the transparency and replicability of the analysis for the study **Everything, altogether, all at once: Addressing data challenges when measuring speech intelligibility through entropy scores**. A digital version of the study can be found in the `Code-links` section
+The purpose of this Additional Notebook is to improve the transparency and replicability of the analysis for the study **Everything, altogether, all at once: Addressing data challenges when measuring speech intelligibility through entropy scores**. A digital version of the study can be found in the `Code-links` section of this document.
+
+Furthermore, the notebook meticulously follows the *When-to-Worry-and-How-to-Avoid-the-Misuse-of-Bayesian-Statistics checklist (WAMBS checklist)* developed by @Depaoli_et_al_2017. The checklist outlines the ten crucial points that need careful scrutiny when employing Bayesian inference procedures. 
 
 ::: {.column-margin}
 **_WAMBS checklist_** 
 
 Questionnaire outlining the ten crucial points that need careful scrutiny when employing Bayesian inference procedures, with the ultimate goal of enhancing the transparency and replicability of Bayesian analysis [@Depaoli_et_al_2017].
 :::
-
-Furthermore, the notebook meticulously follows the *When-to-Worry-and-How-to-Avoid-the-Misuse-of-Bayesian-Statistics checklist (WAMBS checklist)* developed by @Depaoli_et_al_2017. The checklist outlines the ten crucial points that need careful scrutiny when employing Bayesian inference procedures. 
 
 ```{r}
 #| results: hide
@@ -732,8 +732,6 @@ par(mfrow=c(1,1))
 ### Importance {#sec-whybeta}
 It is crucial to comprehend what signifies for an outcome to follow a normal distribution, as the assumption of normally distributed outcomes is ubiquitous in speech intelligibility research [see @Boonen_et_al_2021; @Flipsen_2006; @Lagerberg_et_al_2014]. 
 
-In contrast, the significance of the beta-proportion distribution lies in providing a suitable alternative for modeling non-normally *bounded* distributed outcomes, such as the entropy scores utilized in this study. Neglecting the bounded nature of an outcome can lead, at best, to *underfitting*, and, at worse, to *misspecification*. 
-
 ::: {.column-margin}
 **_Boundedness_**
 
@@ -751,6 +749,9 @@ Occurs when statistical models fail to capture the underlying data patterns, pot
 
 Occurs when the model's functional form or inclusion of covariates poorly represent relevant aspects of the true data. This can lead to inconsistent and inefficient parameters estimates [@Everitt_et_al_2010].
 :::
+
+
+In contrast, the significance of the beta-proportion distribution lies in providing a suitable alternative for modeling non-normally *bounded* distributed outcomes, such as the entropy scores utilized in this study. Neglecting the bounded nature of an outcome can lead, at best, to *underfitting*, and, at worse, to *misspecification*. 
 
 
 ## Linear Mixed Models {#sec-interlude3}
@@ -1484,7 +1485,8 @@ hist(speech_samples$Freq, breaks=20, xlim=c(2, 12), # <1>
 #| label: tbl-speech_samples2
 #| tbl-cap: 'Summary of speech samples across speakers'
 
-kable( psych::describe( speech_samples$Freq ) ) # <1>
+kable( psych::describe( speech_samples$Freq ), # <1>
+       digits=2, row.names=F )
 
 ```
 1. statistical descriptors for the speech samples
