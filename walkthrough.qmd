@@ -95,8 +95,9 @@ Questionnaire outlining the ten crucial points that need careful scrutiny when e
 #| fig-cap: ''
 
 # load packages
-libraries = c('stringr','RColorBrewer','dplyr','knitr',
-              'rethinking','rstan','StanHeaders','runjags')
+libraries = c('RColorBrewer','stringr','dplyr','tidyverse',
+              'rechape2','knitr','kableExtra',
+              'rstan','StanHeaders','runjags','rethinking')
 sapply(libraries, require, character.only=T)
 
 ```
@@ -115,7 +116,7 @@ source( file.path( main_dir, 'walkthrough/code', 'user-defined-functions.R') )
 # Organization
 In this notebook, @sec-interludes introduces various background topics that are relevant to the present study. These topics enable readers to progress smoothly through this research. Specifically, @sec-interlude1 provides a brief explanation of how Bayesian inference procedures work and their importance for this research. @sec-interlude2 is devoted to explaining the difference between two particular distributions, the normal and the beta-proportion distribution, and their role on modeling bounded data. @sec-interlude3 explains the (generalized) linear mixed models, elaborating on their role in modeling (non)normal clustered and bounded data. @sec-interlude4 illustrates the concept of measurement error and the role of latent variables to overcome the problems arising from it. Lastly, @sec-interlude5 explains the effects of the data distributional departures on the parameter estimates, and its importance for this research.
 
-The R packages utilized in the production of this document can be divided in three groups. First, the packages utilized to generate the walk-through: `RColorBrewer` [@RColorBrewer_2022] and `quarto` [@Quarto_2022]. Second, the packages used for the handling the data: `stringr` [@stringr_2022], `dplyr` [@dplyr_2023], `tidyverse` [@tidyverse_2019], and `reshape2` [@reshape_2007]. Lastly, the packages used for the Bayesian estimation: `coda` [@coda_2006], `loo` [@loo_2023; @PSIS_2021], `cmdstanr` [@cmdstanr_2022], `rstan` [@RStan_2020], `runjags` [@runjags_2016], and `rethinking` [@rethinking_2021].
+The R packages utilized in the production of this document can be divided in three groups. First, the packages utilized to generate the walk-through: `RColorBrewer` [@RColorBrewer_2022] and `quarto` [@Quarto_2022]. Second, the packages used for the handling the data: `stringr` [@stringr_2022], `dplyr` [@dplyr_2023], `tidyverse` [@tidyverse_2019], `reshape2` [@reshape_2007], `knitr` [@knitr_2024], and `kableExtra` [@kableExtra_2024]. Lastly, the packages used for the Bayesian estimation: `coda` [@coda_2006], `loo` [@loo_2023; @PSIS_2021], `cmdstanr` [@cmdstanr_2022], `rstan` [@RStan_2020], `runjags` [@runjags_2016], and `rethinking` [@rethinking_2021].
 
 
 # Interludes {#sec-interludes}
@@ -1226,13 +1227,15 @@ par(mfrow=c(1,1))
 
 
 ### Outliers {#sec-outliers}
-Although no unique probabilistic representation of *outliers* can be represented, a simple example can be illustrated with @fig-outliers. The figure depicts the presence of three influential observations in the outcome (colored blue). It is easier to intuit that with the presence of influential observations the parameter estimates, and the hypothesis test resulting from them, can be affected. The intuition is proven correct when $\beta$ is estimated using the same "incorrect" model used in @sec-heteroscedasticity. When an outcome is erroneously assumed without outliers, the parameter value is estimated farther from the truth, as observed in the code output below and in @fig-outliers_inference.
+Outliers can occur by chance in any distribution, but they typically indicate novel behavior or structures in a dataset. For instance, outliers may arise due to measurement error, a heavy-tailed distribution within a population, or when some sampled observations come from a different population than intended [@Grubbs_1969]. Additionally, outliers may emerge when the assumed (causal) generating mechanisms of the data differ from the observed data at the extreme end.
 
 ::: {.column-margin}
 **_Outliers_**
 
-Observation that appear to deviate markedly from other sample data points in which it occurs [@Everitt_et_al_2010].
+Observation that appear to deviate markedly from other sample data points in which it occurs [@Grubbs_1969].
 :::
+
+Although no unique probabilistic representation of *outliers* can be represented, a simple example can be illustrated with @fig-outliers. The figure depicts the presence of three influential observations in the outcome (colored blue). It is easier to intuit that with the presence of influential observations the parameter estimates, and the hypothesis test resulting from them, can be affected. The intuition is proven correct when $\beta$ is estimated using the same "incorrect" model used in @sec-heteroscedasticity. When an outcome is erroneously assumed without outliers, the parameter value is estimated farther from the truth, as observed in the code output below and in @fig-outliers_inference.
 
 
 ```{r}
